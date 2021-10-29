@@ -3,41 +3,49 @@
 
 using namespace std;
 
-int answer = 0;
-string g_name, g_origin = "";
+int Counting(string name, int dir, int cur_idx) {
+    int index = cur_idx;
+    int cnt = 0;
 
-void func(int idx) {
-    int dLeft = 0, dRight = 0, iLeft = idx, iRight = idx;
-    g_origin[idx] = g_name[idx];
+    do {
+        cnt++;
+        index += dir;
+        if (index < 0 || index >= name.length()) index += -dir * name.length();
+    } while (name[index] == 'A' && index != cur_idx);
 
-    //A는 0번, B(1)-N(13)까지는 위로, O(12)-Z(1)까지는 아래로
-    if (g_origin[idx] <= 'N') answer += g_origin[idx] - 'A';
-    else answer += 'Z' - g_origin[idx] + 1;
-
-    if (g_origin == g_name) return;
-
-    //왼쪽과 오른쪽 중 다음 변경할 알파벳이 더 가까운 쪽으로 이동
-    while (g_origin[iRight] == g_name[iRight]) {
-        iRight = (++iRight) % g_name.size();
-        dRight++;
-    }
-    while (g_origin[iLeft] == g_name[iLeft]) {
-        if (--iLeft< 0) iLeft += g_name.size();
-        dLeft++;
-    }
-    if (dLeft < dRight) {
-        answer += dLeft;
-        func(iLeft);
-    }
-    else {
-        answer += dRight;
-        func(iRight);
-    }
+    return cnt;
 }
 
 int solution(string name) {
-    g_name = name;
-    for (int i=0; i < name.size(); i++) g_origin += "A";
-    func(0);
+    int answer = 0;
+    int cnt = 0;
+
+    for (auto& c : name) if (c != 'A') cnt++;
+
+    int cur_idx = 0;
+    while (0 <= cnt) {
+        if (name[cur_idx] != 'A') {
+            answer += ((name[cur_idx] < 'N') ? name[cur_idx] - 'A' : 'Z' - name[cur_idx] + 1);
+            name[cur_idx] = 'A';
+            cnt--;
+        }
+        if (cnt == 0) break;
+
+        int left_cnt, right_cnt;
+        left_cnt = Counting(name, -1, cur_idx);
+        right_cnt = Counting(name, 1, cur_idx);
+
+        if (left_cnt < right_cnt) {
+            cur_idx -= left_cnt;
+            if (cur_idx < 0) cur_idx += name.length();
+            answer += left_cnt;
+        }
+        else {
+            cur_idx += right_cnt;
+            if (cur_idx >= name.length()) cur_idx -= name.length();
+            answer += right_cnt;
+        }
+    }
+
     return answer;
 }

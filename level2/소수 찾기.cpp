@@ -1,58 +1,54 @@
 #include <string>
 #include <vector>
-#include <algorithm>
-#include <math.h>
+#include <set>
+#include <cmath>
 
 using namespace std;
 
-string g_numbers;
-vector<int> v;
-vector<bool> g_checked;
+set<int> s_num;
+int max_num = 0;
 
-void func(string num, int idx, int left) {
-    g_checked[idx] = true;
-    if (left == 0) {
-        v.push_back(stoi(num));
-        return;
-    }
-    for (int i = 0; i < g_numbers.size(); i++) {
-        if (!g_checked[i]) {
-            func(num + g_numbers[i], i, left-1);
-            g_checked[i] = false;
+void makeNumber(bool isVisited[], string numbers, string number) {
+    if (number.length() == numbers.length()) return;
+
+    string new_str;
+    int new_num;
+
+    for (int i = 0; i < numbers.length(); i++) {
+        if (!isVisited[i]) {
+            new_str = number + numbers[i];
+            new_num = stoi(new_str);
+
+            if (max_num < new_num) max_num = new_num;
+            s_num.insert(new_num);
+
+            isVisited[i] = true;
+            makeNumber(isVisited, numbers, new_str);
+            isVisited[i] = false;
         }
     }
 }
 
 int solution(string numbers) {
-    int answer = 0, i, j, size=numbers.size();
-    vector<bool> prime;
-    vector<bool> checked(size, false);
-    
-    sort(numbers.begin(),numbers.end());
-    g_numbers = numbers;
-    
-    //숫자 만들어 저장
-    for (i=0; i<size; i++) {
-        for(j=0; j<size; j++){
-            if (numbers[j] != 0) {
-                g_checked = checked;
-                func(string(1, numbers[j]), j, i);
-            }
-        }
-    }
-    
-    //정렬 후 중복 제거
-    sort(v.begin(), v.end());
-    v.erase(unique(v.begin(),v.end()),v.end());
+    int answer = 0;
 
-    //소수 찾기
-    for(int n:v){
-        int cnt=0;
-        if(n<2) continue;
-        for(i=2; i<=sqrt(n); i++){
-            if(n%i==0) cnt++;
-        }
-        if(cnt==0) answer++;
+    bool isVisited[7];
+    fill_n(isVisited, numbers.length(), false);
+    makeNumber(isVisited, numbers, "");
+
+    vector<bool> isPrime;
+    isPrime.assign(max_num + 1, true);
+    isPrime[0] = false;
+    isPrime[1] = false;
+
+    for (int i = 2; i <= sqrt(max_num); i++) {
+        int mul = 2;
+        while (i * mul <= max_num) isPrime[i * mul++] = false;
     }
+
+    for (auto& s : s_num) {
+        if (isPrime[s]) answer++;
+    }
+
     return answer;
 }

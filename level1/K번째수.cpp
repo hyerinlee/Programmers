@@ -6,14 +6,13 @@ using namespace std;
 
 vector<int> solution(vector<int> array, vector<vector<int>> commands) {
     vector<int> answer;
-    for (int i=0; i<commands.size(); i++) {
-        vector<int> temp;
+    vector<int> c_arr;
 
-        for (int j=commands[i][0]-1; j<commands[i][1]; j++) {
-            temp.push_back(array[j]);
-        }
-        sort(temp.begin(), temp.end());
-        answer.push_back(temp.at(commands[i][2]-1));
+    for (auto& c : commands) {
+        c_arr.clear();
+        c_arr.assign(array.begin() + (c[0] - 1), array.begin() + (c[1]));
+        sort(c_arr.begin(), c_arr.end());
+        answer.push_back(c_arr[c[2] - 1]);
     }
 
     return answer;
